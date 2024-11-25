@@ -1,15 +1,17 @@
 import minioClient from "../clients/minio.client";
-import { createUpload, deleteByFilename, existingFile, getMonthlyUploadSize } from "../repositories/file.repository";
+import { createUpload, deleteByFilename, existingFile, getMonthlyUploadSize, getUploadsByUserId } from "../repositories/file.repository";
 import { error } from "console";
 import S3FileService from "./s3.service";
 import MinioFileService from "./minio.service";
 import { IFileStrategy } from "./file.strategy";
 
 
-export async function share(bucketName: string, targetBucketName: string, fileName: string) {
+export async function share(targetPathName: string, sourcePath: string) {
     try{
-        const sourceBucketNameAndObjectName = `/${bucketName}/${fileName}`;
-        await minioClient.copyObject(targetBucketName, fileName, sourceBucketNameAndObjectName);
+        let uploadStrategies : IFileStrategy[] = [(new S3FileService()), (new MinioFileService())];
+        for(const strat of uploadStrategies){
+            strat.shareFile(sourcePath,targetPathName);
+        }
     }catch(error){
         throw(error);
     }
@@ -68,22 +70,30 @@ export async function download(fileName: string) {
 
 export async function upload(userId: string, file: Express.Multer.File) {
     try{        
+
+        let uploadStrategies : IFileStrategy[] = [(new S3FileService()), (new MinioFileService())];
         const filePath = `uploads/${userId}/${file.originalname}`;
         const monthlySize = await getMonthlyUploadSize(userId);
         
         if(((monthlySize + file.size)/1_000_000_000) > 5){
             throw(error);
         }
-        let uploadService: IFileStrategy;
-        uploadService = new S3FileService();
-        await uploadService.uploadFile(filePath, file);
 
-        uploadService = new MinioFileService();
-        await uploadService.uploadFile(filePath, file);
-
+        for(const strat of uploadStrategies){
+            strat.uploadFile(filePath, file);
+        }
         
-
         await createUpload(file.originalname, userId,file.size);
+    }catch(error){
+        throw(error);
+    }
+}
+
+export async function getUploadsFromUser(userId: string){
+    try{        
+
+        return getUploadsByUserId(userId);
+    
     }catch(error){
         throw(error);
     }

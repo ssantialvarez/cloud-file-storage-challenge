@@ -1,9 +1,11 @@
 import { Role } from "../utils/user.dto";
-import { createUser, validateUser, getAllUsers, getById, deleteByUsername } from "../repositories/user.repository";
+import { createUser, validateUser, getAllUsers, getById, deleteByUsername, getByUsername } from "../repositories/user.repository";
 import jwt from 'jsonwebtoken';
 import { SECRET_KEY } from "../middleware/auth";
-import { User } from "@prisma/client";
-import { getDailyUploadSize } from "../repositories/file.repository";
+import { Upload, User } from "@prisma/client";
+import { deleteUploadsByUserID, getDailyUploadSize, getUploadsByUserId } from "../repositories/file.repository";
+import { deleteFile } from "./file.service";
+
 
 
 export async function register(data:{username:string, password:string, role?:Role}): Promise<void> {
@@ -73,9 +75,28 @@ export async function getUserById(id:string):Promise<User|void>{
     }
 }
 
-export async function deleteUserByUsername(username:string){
+
+export async function getUserByUsername(username:string):Promise<User|void>{
     try{
-        await deleteByUsername(username);
+        return await getByUsername(username);
+    }catch(e){
+        throw new Error("Unable to get user");
+    }
+}
+
+
+export async function deleteUserByUsername(user:User){
+    try{
+        const userUploads = await getUploadsByUserId(user.id) as Upload[];
+
+        for(const userUpload of userUploads){
+            let fileKey = `uploads/${user.id}/${userUpload.fileName}`;
+            await deleteFile(fileKey);
+        }
+
+
+        await deleteUploadsByUserID(user.id);
+        await deleteByUsername(user.username);
     }catch(e){
         throw new Error("Unable to get user");
     }

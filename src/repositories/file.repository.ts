@@ -34,6 +34,14 @@ export async function deleteByFilename(fileName:string, userId: string) {
     });
 }
 
+export async function deleteUploadsByUserID(userId:string) {
+    try{
+      await prisma.upload.deleteMany({where:{userId:userId}})
+    }catch(error){
+      throw(error);
+    }
+}
+
 export async function getUploadsByUserId(userId:string):Promise<Upload[]|void> {
     try{
       return await prisma.upload.findMany({where:{userId:userId}});

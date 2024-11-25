@@ -1,3 +1,4 @@
+import { CopySourceOptions } from "minio";
 import minioClient from "../clients/minio.client";
 import { IFileStrategy } from "./file.strategy";
 
@@ -33,6 +34,16 @@ class MinioFileService implements IFileStrategy{
             throw error;
         }
     }
+    async shareFile(sourcePath: string, targetPath: string): Promise<any> {
+        try{
+            await minioClient.copyObject('cloud-file-storage.sirius', targetPath, sourcePath);
+        }catch(error){
+            console.error("MinIO error:", error);
+            throw error;
+        }
+    }
+
+
 }
 
 

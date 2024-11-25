@@ -58,6 +58,23 @@ class S3FileService implements IFileStrategy{
             throw null;
         }
     }
+
+    async shareFile(sourcePath: string, targetPath: string):Promise<any>{
+      const params = {
+          Bucket: 'cloud-file-storage.sirius',  // El nombre del bucket
+          CopySource: `cloud-file-storage.sirius/${sourcePath}`, // Origen del archivo: la ruta original
+          Key: targetPath, // Destino del archivo: en la carpeta del usuario destino
+      };
+    
+      try {
+          const data = await s3.copyObject(params); // Copiar el archivo
+          console.log('File shared successfully:', data);
+          return true;
+      } catch (err) {
+          console.error('Error sharing file:', err);
+          throw new Error('Error sharing file between users');
+      }
+    };
 }
 
 

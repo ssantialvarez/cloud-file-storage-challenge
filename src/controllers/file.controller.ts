@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { CustomRequest } from "../middleware/auth";
 import { JwtPayload } from "jsonwebtoken";
 import { deleteFile, deleteUpload, download, share, upload } from "../services/file.service";
+import { getUserByUsername } from "../services/user.service";
+import { User } from "@prisma/client";
 
 export const uploadFile = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -55,11 +57,13 @@ export const downloadFile = async (req: Request, res: Response, next: NextFuncti
 
 export const shareFile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { targetBucketName, fileName } = req.body
+        const { targetUsername, fileName } = req.body
         const token = (req as CustomRequest).token as JwtPayload;  
-        const bucketName = token.name as string;
+        const userFound = await getUserByUsername(targetUsername) as User;
         
-        await share(bucketName,targetBucketName,fileName);
+        const filePath = `uploads/${token.id}/${fileName}`;
+        const targetPath =  `uploads/${userFound.id}/${fileName}`;
+        await share(targetPath,filePath);
         res.status(200).json({ message: 'File shared successfully', fileName });
         
     } catch (error) {

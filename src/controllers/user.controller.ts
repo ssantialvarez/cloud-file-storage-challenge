@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { getErrorMessage } from '../utils/errors.util';
-import { deleteUserByUsername, getStatsUsers, getUserById, login, register } from '../services/user.service';
+import { deleteUserByUsername, getStatsUsers, getUserById, getUserByUsername, login, register } from '../services/user.service';
 import { CustomRequest } from '../middleware/auth';
 import { JwtPayload } from 'jsonwebtoken';
 import { Role, User } from '@prisma/client';
@@ -32,14 +32,15 @@ export const deleteOne = async (req: Request, res: Response, next: NextFunction)
     try {
         const token = (req as CustomRequest).token as JwtPayload;
         // Verificamos que el usuario llamando a /delete endpoint sea ADMIN
-        const user = await getUserById(token.id) as User;
+        let user = await getUserById(token.id) as User;
         if(user.role == Role.USER){
             res.status(403).send('Cannot delete. Only administrator.')
             return ;
         }
         // Se obtiene el username a eliminar.
         const username  = req.params.username;
-        await deleteUserByUsername(username);
+        user = await getUserByUsername(username) as User;
+        await deleteUserByUsername(user);
 
         res.status(200).send('Deleted successfully');
     } catch (error) {

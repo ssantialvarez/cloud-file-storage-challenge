@@ -17,7 +17,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
      throw new Error();
    }
 
-   const decoded = jwt.verify(token, SECRET_KEY) as JwtPayload;;
+   const decoded = jwt.verify(token, SECRET_KEY);
    (req as CustomRequest).token = decoded;
 
    next();

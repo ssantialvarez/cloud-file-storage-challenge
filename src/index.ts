@@ -3,8 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import errorMiddleware from './middleware/errorHandler';
 import helmet from 'helmet';
-import routes from './routes/routes';
-
+import fileRoutes from './routes/file.routes';
+import userRoutes from './routes/user.routes';
 
 const app = express();
 
@@ -14,7 +14,8 @@ app.use(errorMiddleware);
 app.use(helmet());
 app.use(cors());
 
-app.use('/api', routes);
+app.use('/api', fileRoutes);
+app.use('', userRoutes);
 
 
 app.listen(3000, () => {

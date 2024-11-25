@@ -14,10 +14,21 @@ datasource db {
 }
 
 model User {
-  id        String  @id      @default(uuid())
-  username  String  @unique  @db.VarChar(30)
+  id        String    @id      @default(uuid())
+  username  String    @unique @db.VarChar(30)
   password  String
-  role      Role    @default(USER)
+  role      Role      @default(USER)
+  uploads   Upload[]  
+}
+
+model Upload {
+  id        String   @id      @default(uuid())
+  fileName  String   
+  size      Float    
+  uploaded  DateTime @default(now()) 
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  @@unique([fileName,userId]) 
 }
 
 enum Role {

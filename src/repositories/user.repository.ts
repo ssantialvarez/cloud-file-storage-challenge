@@ -57,3 +57,37 @@ export async function getById(id:string):Promise<User|void>{
 
     return user;
 }
+
+
+export async function getByUsername(username:string):Promise<User|void>{
+    let user = await prisma.user.findUnique({
+        where:{
+            username:username
+        }
+    });
+
+    if(!user)
+        throw new Error("User doesn't exists");
+
+    return user;
+}
+
+export async function deleteByUsername(username:string){
+    let user = await prisma.user.findUnique({
+        where:{
+            username:username
+        }
+    });
+    console.log(user);
+    if(!user)
+        throw new Error("User doesn't exists");
+
+
+    await prisma.user.delete({
+        where:{
+            username:username
+        }
+    });
+
+    
+}

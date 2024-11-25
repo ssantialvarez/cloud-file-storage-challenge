@@ -5,13 +5,15 @@ import { deleteFile, deleteUpload, download, share, upload } from "../services/f
 
 export const uploadFile = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        // Verificamos que haya un archivo en Request
         if (!req.file) {
             res.status(400).json({ error: 'No file uploaded' });
             return ;
         }
+        // Del token de autorizacion podemos obtener el id del user que esta subiendo el archivo 
         const token = (req as CustomRequest).token as JwtPayload;  
        
-        
+        // Subimos el archivo
         await upload(token.id, req.file);
           
         res.status(200).json({ message: 'File uploaded successfully'});
@@ -28,9 +30,9 @@ export const downloadFile = async (req: Request, res: Response, next: NextFuncti
         const fileName = req.params.fileName;
         
         const token = (req as CustomRequest).token as JwtPayload;  
-        
+        // Armamos la ruta/fileKey para hallar el archivo
         const fileKey = `uploads/${token.id}/${fileName}`;
-        
+        // Descargamos el archivo y obtenemos el ReadableStream
         const fileStream = await download(fileKey);
 
         // Verificamos que realmente se haya obtenido un stream antes de proceder
@@ -46,7 +48,7 @@ export const downloadFile = async (req: Request, res: Response, next: NextFuncti
         fileStream.pipe(res);        
     } catch (error) {
         console.error('Error downloading file:', error);
-        res.status(500).json({ error: 'Error downl file' });
+        res.status(500).json({ error: 'Error downloading file' });
         return ;
     }
 }
@@ -61,8 +63,8 @@ export const shareFile = async (req: Request, res: Response, next: NextFunction)
         res.status(200).json({ message: 'File shared successfully', fileName });
         
     } catch (error) {
-        console.error('Error uploading file:', error);
-        res.status(500).json({ error: 'Error uploading file' });
+        console.error('Error while sharing file:', error);
+        res.status(500).json({ error: 'Error while sharing file' });
         return ;
     }
 }
@@ -75,7 +77,9 @@ export const delFile = async (req: Request, res: Response, next: NextFunction) =
         
         const fileKey = `uploads/${token.id}/${fileName}`;
         
+        // Primero eliminamos el archivo de la nube
         await deleteFile(fileKey);
+        // Luego se elimina el registro Upload de la base de datos
         await deleteUpload(fileName,token.id);
         res.status(200).json({ message: 'File deleted successfully'});
         return ;

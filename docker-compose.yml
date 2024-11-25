@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: claromio
+      POSTGRES_PASSWORD: clushruyul
+      POSTGRES_DB: cloud_file_storage  # El nombre de tu base de datos
+    ports:
+      - "5433:5432"  # Exponiendo el puerto 5432 del contenedor como 5433 en la máquina host
+    networks:
+      - app-network  # Definir la red de contenedores
+  
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DB_USER=claromio
+      - DB_PASSWORD=clushruyul
+      - DB_HOST=db  # El nombre del servicio db
+      - DB_PORT=5432
+      - DB_NAME=cloud_file_storage
+    ports:
+      - "3000:3000"  # Puerto donde se expone la API
+    depends_on:
+      - db  # Asegura que el servicio db se inicie antes de la API
+
+    networks:
+      - app-network  # La misma red para la API
+
+networks:
+  app-network:  # Definir la red de contenedores
+    driver: bridge

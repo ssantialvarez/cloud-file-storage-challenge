@@ -18,6 +18,12 @@ app.use('/api', fileRoutes);
 app.use('', userRoutes);
 
 
-app.listen(3000, () => {
-  console.log('Servidor corriendo en http://localhost:3000');
-});
+const port = process.env.PORT || 3000;
+
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => {
+    console.log(`Servidor corriendo en http://localhost:${port}`);
+  });
+}
+
+export default app;

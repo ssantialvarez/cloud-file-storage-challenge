@@ -36,23 +36,30 @@ export async function login(data:{username:string, password:string, role?:Role})
     }
 };
 
-export async function getStatsUsers():Promise<User[]|void>{
+export async function getStatsUsers():Promise<{ username: string; role: string; userSizeGb: number }[]|void>{
 
     try{
         const users = await getAllUsers() as User[];
-        let filteredUsers: User[] = []; // Un nuevo array para los usuarios que no cumplen con la condición
+        const stats: { username: string; role: string; userSizeGb: number }[] = []; // Nuevo array para los resultados
 
-        for (const user of users) {
-            const userSize = await getDailyUploadSize(user.id); // Obtén el tamaño diario del usuario
+        const userSizes = await Promise.all(
+            users.map(user => getDailyUploadSize(user.id).then(userSize => ({ user, userSize })))
+        );
 
+        for (const { user, userSize } of userSizes) {
+            
             // Solo agrega al nuevo array los usuarios cuyo tamaño no sea 0
             if (userSize > 0) {
-                filteredUsers.push(user);
+                stats.push({
+                    username: user.username,
+                    role: user.role,
+                    userSizeGb: (userSize/1_000_000_000)
+                });                
             }
         }
 
         // Devuelve el array de usuarios filtrados
-        return filteredUsers;
+        return stats;
     }catch(e){
         throw new Error("Unable to get users");
     }

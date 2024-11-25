@@ -1,21 +1,21 @@
 import dotenv from 'dotenv'; 
 import s3 from '../clients/s3.client';
 import { IFileStrategy } from './file.strategy';
-dotenv.config();  // Load environment variables from .env file 
+dotenv.config();  
 
 
 class S3FileService implements IFileStrategy{
     async uploadFile(fileName: string, file: Express.Multer.File): Promise<any> {
         const params = {
-            Bucket: 'cloud-file-storage.sirius',         // El nombre de tu bucket
-            Key: fileName, // Carpeta organizada por usuario
+            Bucket: 'cloud-file-storage.sirius',         
+            Key: fileName, 
             Body: file.buffer,                  // El archivo que se sube (usando Multer)
-            ContentType: file.mimetype,         // El tipo de archivo (ej. imagen, pdf, etc.)
+            ContentType: file.mimetype,         
           };
         
           try {
-            const data = await // The `.promise()` call might be on an JS SDK v2 client API.
-            // If yes, please remove .promise(). If not, remove this comment.
+            const data = await 
+            
             s3.putObject(params);
             console.log('File uploaded successfully:', data);
             return true;
@@ -28,7 +28,7 @@ class S3FileService implements IFileStrategy{
     async downloadFile(fileName: string): Promise<NodeJS.ReadableStream> {
         const params = {
             Bucket: 'cloud-file-storage.sirius',
-            Key: fileName, // Nombre del archivo o key que deseas recuperar
+            Key: fileName, 
         };
           
         try {
@@ -48,7 +48,7 @@ class S3FileService implements IFileStrategy{
     async deleteFile(fileName: string): Promise<any> {
         const params = {
             Bucket: 'cloud-file-storage.sirius',
-            Key: fileName, // Nombre del archivo o key que deseas recuperar
+            Key: fileName, 
         };
         try{
             await s3.deleteObject(params);

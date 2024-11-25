@@ -13,7 +13,7 @@ class MinioFileService implements IFileStrategy{
             
           } catch (err) {
             console.error('Error uploading file:', err);
-            throw new Error('Error uploading file to S3');
+            throw new Error('Error uploading file to minIO');
           }
     }
     async downloadFile(fileName: string): Promise<NodeJS.ReadableStream> {

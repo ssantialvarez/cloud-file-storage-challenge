@@ -63,7 +63,7 @@ class S3FileService implements IFileStrategy{
       const params = {
           Bucket: 'cloud-file-storage.sirius',  // El nombre del bucket
           CopySource: `cloud-file-storage.sirius/${sourcePath}`, // Origen del archivo: la ruta original
-          Key: targetPath, // Destino del archivo: en la carpeta del usuario destino
+          Key: `cloud-file-storage.sirius/${targetPath}`, // Destino del archivo: en la carpeta del usuario destino
       };
     
       try {

@@ -36,7 +36,7 @@ class MinioFileService implements IFileStrategy{
     }
     async shareFile(sourcePath: string, targetPath: string): Promise<any> {
         try{
-            await minioClient.copyObject('cloud-file-storage.sirius', targetPath, sourcePath);
+            await minioClient.copyObject('cloud-file-storage.sirius', targetPath, `cloud-file-storage.sirius/${sourcePath}`);
         }catch(error){
             console.error("MinIO error:", error);
             throw error;

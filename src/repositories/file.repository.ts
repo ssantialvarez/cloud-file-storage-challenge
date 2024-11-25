@@ -50,6 +50,15 @@ export async function getUploadsByUserId(userId:string):Promise<Upload[]|void> {
     }   
 }
 
+export async function getUploadByFileNameUserId(userId:string, fileName: string):Promise<Upload|null> {
+  try{
+    const upload = await prisma.upload.findUnique({where:{fileName_userId:{fileName, userId}}});
+    return upload;
+  }catch(error){
+    throw error;
+  }   
+}
+
 
 export async function existingFile(userId:string, fileName: string):Promise<boolean|void> {
   try{

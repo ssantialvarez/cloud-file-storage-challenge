@@ -63,7 +63,9 @@ export const shareFile = async (req: Request, res: Response, next: NextFunction)
         
         const filePath = `uploads/${token.id}/${fileName}`;
         const targetPath =  `uploads/${userFound.id}/${fileName}`;
-        await share(targetPath,filePath);
+
+        
+        await share(targetPath,filePath,userFound.id,token.id);
         res.status(200).json({ message: 'File shared successfully', fileName });
         
     } catch (error) {

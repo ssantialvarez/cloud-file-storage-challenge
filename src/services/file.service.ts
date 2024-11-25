@@ -1,17 +1,22 @@
 import minioClient from "../clients/minio.client";
-import { createUpload, deleteByFilename, existingFile, getMonthlyUploadSize, getUploadsByUserId } from "../repositories/file.repository";
+import { createUpload, deleteByFilename, existingFile, getMonthlyUploadSize, getUploadByFileNameUserId, getUploadsByUserId } from "../repositories/file.repository";
 import { error } from "console";
 import S3FileService from "./s3.service";
 import MinioFileService from "./minio.service";
 import { IFileStrategy } from "./file.strategy";
+import { Upload } from "@prisma/client";
 
 
-export async function share(targetPathName: string, sourcePath: string) {
+export async function share(targetPathName: string, sourcePath: string, targetUserId: string, sourceUserId: string) {
     try{
         let uploadStrategies : IFileStrategy[] = [(new S3FileService()), (new MinioFileService())];
         for(const strat of uploadStrategies){
             strat.shareFile(sourcePath,targetPathName);
         }
+        const originalname = targetPathName.split('/')[2];
+        console.log(originalname);
+        const upload = await getUploadByFileNameUserId(sourceUserId,originalname) as Upload;
+        await createUpload(originalname, targetUserId, upload.size);
     }catch(error){
         throw(error);
     }
